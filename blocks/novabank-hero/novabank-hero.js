@@ -5,47 +5,51 @@ export default function decorate(block) {
   const imageRow = rows[1];
   const ctaRow = rows[2];
 
-  if (!contentRow || !imageRow || !ctaRow) {
-    console.warn('NovaBank Hero: unexpected markup');
-    return;
+  // Content is optional; don't fail the whole block.
+  if (contentRow) {
+    contentRow.classList.add('novabank-hero-content');
+
+    const heading = contentRow.querySelector(
+      'h1, h2, h3, h4, h5, h6',
+    );
+
+    if (heading) {
+      heading.classList.add('novabank-hero-heading');
+    }
   }
 
-  // 1. Identify the content row.
-  contentRow.classList.add('novabank-hero-content');
+  // Preserve the original authoring link.
+  if (imageRow) {
+    imageRow.classList.add('novabank-hero-media');
 
-  const heading = contentRow.querySelector(
-    'h1, h2, h3, h4, h5, h6',
-  );
+    const imageLink = imageRow.querySelector('a[href]');
 
-  if (heading) {
-    heading.classList.add('novabank-hero-heading');
+    if (imageLink) {
+      const image = document.createElement('img');
+
+      image.src = imageLink.href;
+      image.alt = imageLink.textContent.trim();
+      image.decoding = 'async';
+      image.loading = 'eager';
+
+      // Add the visual image without removing
+      // the authoring link.
+      imageLink.parentElement.append(image);
+
+      imageLink.classList.add('novabank-hero-asset-link');
+    }
   }
 
-  // 2. Convert the image reference into an image.
-  const imageLink = imageRow.querySelector('a[href]');
+  // Keep the CTA anchor editable.
+  if (ctaRow) {
+    ctaRow.classList.add('novabank-hero-actions');
 
-  if (imageLink) {
-    const image = document.createElement('img');
+    const cta = ctaRow.querySelector('a[href]');
 
-    image.src = imageLink.href;
-    image.alt = imageLink.textContent.trim();
-    image.loading = 'eager';
-    image.decoding = 'async';
-
-    imageLink.replaceWith(image);
+    if (cta) {
+      cta.classList.add('novabank-hero-button');
+    }
   }
 
-  imageRow.classList.add('novabank-hero-media');
-
-  // 3. Decorate the CTA link.
-  const cta = ctaRow.querySelector('a[href]');
-
-  if (cta) {
-    cta.classList.add('novabank-hero-button');
-  }
-
-  ctaRow.classList.add('novabank-hero-actions');
-
-  // 4. Mark the component as decorated.
   block.classList.add('novabank-hero-ready');
 }
